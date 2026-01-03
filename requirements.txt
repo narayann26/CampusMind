@@ -4,3 +4,5 @@ langchain
 langchain-community
 pypdf
 python-dotenv
+groq
+passlib[bcrypt]
