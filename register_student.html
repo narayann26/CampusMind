@@ -3,39 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>CampusMind | Student Sign Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .reg-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 320px; text-align: center; }
-        h2 { color: #1a237e; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        body { font-family: 'Inter', sans-serif; background: #050505; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #d4af37; }
+        .reg-card { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #d4af37; box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); width: 350px; text-align: center; }
+        h2 { color: #d4af37; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
+        input:focus { border-color: #d4af37; outline: none; }
+        button { width: 100%; padding: 12px; background: #d4af37; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #ffdf00; transform: scale(1.02); }
+        .login-link { text-align: center; margin-top: 20px; font-size: 14px; color: #888; }
+        .login-link a { color: #d4af37; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="reg-card">
-        <h2>Student Sign Up</h2>
+        <i class="fas fa-user-graduate fa-3x" style="margin-bottom: 15px;"></i>
+        <h2>Student Registration</h2>
         <input type="text" id="username" placeholder="Choose Username">
         <input type="password" id="password" placeholder="Choose Password">
         <button onclick="register()">Create Account</button>
-        <p><a href="login.html" style="text-decoration:none; color:#1a237e;">Back to Login</a></p>
+        <div class="login-link">Already a member? <a href="login.html">Login here</a></div>
     </div>
 
     <script>
+        // Render API Link
+        const API_URL = 'https://campusmind-3eyc.onrender.com';
+
         async function register() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
-            if(!u || !p) return alert("Fill all fields");
+            if(!u || !p) return alert("Please fill all fields!");
 
-            const res = await fetch('http://127.0.0.1:8000/register_student', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username: u, password: p })
-            });
-            if(res.ok) {
-                alert("Account Created! You can now login.");
-                window.location.href = 'login.html';
-            } else {
-                alert("Username already taken!");
+            try {
+                const res = await fetch(`${API_URL}/register_student`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                
+                if(res.ok) {
+                    alert("Account Created! You can now login to the Royal Edition.");
+                    window.location.href = 'login.html';
+                } else {
+                    const data = await res.json();
+                    alert(data.detail || "Username already taken!");
+                }
+            } catch (err) {
+                alert("Connection failed. Backend might be starting up...");
             }
         }
     </script>

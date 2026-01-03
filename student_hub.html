@@ -179,18 +179,17 @@
     </div>
 
     <script>
+        // Render API Link
+        const API_URL = 'https://campusmind-3eyc.onrender.com';
+
         // 1. Correct Tab Switch Logic
         function switchTab(tabId, el) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            // Remove active from all nav items
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             
-            // Show target tab
             document.getElementById(tabId).classList.add('active');
             el.classList.add('active');
 
-            // If switching to PYQ, load all by default
             if(tabId === 'pyq-hub') searchPYQs();
         }
 
@@ -206,7 +205,7 @@
             win.scrollTop = win.scrollHeight;
 
             try {
-                const res = await fetch('http://127.0.0.1:8000/chat', {
+                const res = await fetch(`${API_URL}/chat`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ query: q, role: 'student' })
@@ -217,7 +216,9 @@
                 aiMsgDiv.innerHTML = marked.parse(data.response);
                 win.appendChild(aiMsgDiv);
                 win.scrollTop = win.scrollHeight;
-            } catch(e) { win.innerHTML += `<div class="message ai">Database Offline.</div>`; }
+            } catch(e) { 
+                win.innerHTML += `<div class="message ai">Connection Error. AI is taking a break.</div>`; 
+            }
         }
 
         // 3. PYQ Search Logic
@@ -227,7 +228,7 @@
             grid.innerHTML = "<p style='color: #888;'>Scanning Archive...</p>";
 
             try {
-                const res = await fetch(`http://127.0.0.1:8000/student/search_pyqs?query=${query}`);
+                const res = await fetch(`${API_URL}/student/search_pyqs?query=${query}`);
                 const papers = await res.json();
                 grid.innerHTML = "";
 
@@ -238,13 +239,15 @@
 
                 papers.forEach(p => {
                     grid.innerHTML += `
-                        <div class="paper-card" onclick="window.open('http://127.0.0.1:8000/${p.path}', '_blank')">
+                        <div class="paper-card" onclick="window.open('${API_URL}/${p.path}', '_blank')">
                             <i class="fas fa-file-pdf fa-3x" style="color: var(--gold); margin-bottom: 15px;"></i>
                             <h3 style="margin: 0; font-size: 16px;">${p.name}</h3>
                             <p style="color: #666; font-size: 13px; margin: 10px 0 0 0;">${p.code} | ${p.year}</p>
                         </div>`;
                 });
-            } catch(e) { grid.innerHTML = "<p style='color: #ff4444;'>Error connecting to archive.</p>"; }
+            } catch(e) { 
+                grid.innerHTML = "<p style='color: #ff4444;'>Error connecting to archive.</p>"; 
+            }
         }
     </script>
 </body>

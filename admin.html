@@ -22,10 +22,10 @@
 <body>
     <div class="sidebar">
         <h2 style="color:#d4af37; text-align:center;">ADMIN HQ</h2>
-        <div class="nav-item active" onclick="tab('dash')">Dashboard</div>
-        <div class="nav-item" onclick="tab('staff')">Staff Requests</div>
-        <div class="nav-item" onclick="tab('pyq')">Upload PYQ</div>
-        <div class="nav-item" onclick="tab('docs')">Knowledge Sync</div>
+        <div class="nav-item active" id="nav-dash" onclick="tab('dash')">Dashboard</div>
+        <div class="nav-item" id="nav-staff" onclick="tab('staff')">Staff Requests</div>
+        <div class="nav-item" id="nav-pyq" onclick="tab('pyq')">Upload PYQ</div>
+        <div class="nav-item" id="nav-docs" onclick="tab('docs')">Knowledge Sync</div>
         <div class="nav-item" onclick="location.href='login.html'">Logout</div>
     </div>
     <div class="main">
@@ -55,26 +55,60 @@
         </div>
     </div>
     <script>
-        function tab(t) { document.querySelectorAll('.card').forEach(c=>c.style.display='none'); document.getElementById(t).style.display='block'; if(t==='dash'||t==='staff') load(); }
-        async function load() {
-            const res = await fetch('http://127.0.0.1:8000/admin/analytics'); const data = await res.json();
-            document.getElementById('s-count').innerText = data.total_students; document.getElementById('t-count').innerText = data.total_staff;
-            const sRes = await fetch('http://127.0.0.1:8000/admin/pending_staff'); const staff = await sRes.json();
-            document.getElementById('staff-table').innerHTML = staff.map(s => `<tr><td>${s.username}</td><td>${s.school}</td><td><button onclick="approve(${s.id})" class="btn" style="width:auto">Approve</button></td></tr>`).join('');
+        // Render API Link
+        const API_URL = 'https://campusmind-3eyc.onrender.com';
+
+        function tab(t) { 
+            document.querySelectorAll('.card').forEach(c=>c.style.display='none'); 
+            document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+            document.getElementById(t).style.display='block'; 
+            document.getElementById('nav-'+t).classList.add('active');
+            if(t==='dash'||t==='staff') load(); 
         }
-        async function approve(id) { await fetch('http://127.0.0.1:8000/admin/approve_user', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:id})}); load(); }
+
+        async function load() {
+            try {
+                // Dashboard stats
+                const res = await fetch(`${API_URL}/admin/stats`); 
+                const data = await res.json();
+                document.getElementById('s-count').innerText = data.total_students || 0; 
+                document.getElementById('t-count').innerText = data.total_staff || 0;
+
+                // Pending staff
+                const sRes = await fetch(`${API_URL}/admin/pending_staff`); 
+                const staff = await sRes.json();
+                document.getElementById('staff-table').innerHTML = staff.map(s => `<tr><td>${s.username}</td><td>${s.school}</td><td><button onclick="approve(${s.id})" class="btn" style="width:auto">Approve</button></td></tr>`).join('');
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
+
+        async function approve(id) { 
+            await fetch(`${API_URL}/admin/approve_user`, {
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({user_id:id})
+            }); 
+            load(); 
+        }
+
         async function upload(type) {
             const fd = new FormData();
             if(type==='pyq') {
-                fd.append("subject_name", document.getElementById('p-name').value); fd.append("subject_code", document.getElementById('p-code').value);
-                fd.append("year", document.getElementById('p-year').value); fd.append("course", "SOET"); fd.append("file", document.getElementById('p-file').files[0]);
-                await fetch('http://127.0.0.1:8000/admin/upload_pyq', {method:'POST', body:fd});
+                fd.append("subject_name", document.getElementById('p-name').value); 
+                fd.append("subject_code", document.getElementById('p-code').value);
+                fd.append("year", document.getElementById('p-year').value); 
+                fd.append("course", "SOET"); 
+                fd.append("file", document.getElementById('p-file').files[0]);
+                await fetch(`${API_URL}/admin/upload_pyq`, {method:'POST', body:fd});
             } else {
-                fd.append("doc_type", document.getElementById('doc-type').value); fd.append("file", document.getElementById('gen-file').files[0]);
-                await fetch('http://127.0.0.1:8000/admin/upload_doc', {method:'POST', body:fd});
+                fd.append("doc_type", document.getElementById('doc-type').value); 
+                fd.append("file", document.getElementById('gen-file').files[0]);
+                await fetch(`${API_URL}/admin/upload_doc`, {method:'POST', body:fd});
             }
             alert("Success!");
         }
+
         window.onload = load;
     </script>
 </body>

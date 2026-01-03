@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>CampusMind | Staff Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .reg-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; }
-        h2 { color: #1a237e; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1a237e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #0d1440; }
-        .login-link { text-align: center; margin-top: 15px; font-size: 14px; }
+        body { font-family: 'Inter', sans-serif; background: #050505; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #d4af37; }
+        .reg-card { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #d4af37; box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); width: 380px; text-align: center; }
+        h2 { color: #d4af37; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
+        input:focus, select:focus { border-color: #d4af37; outline: none; }
+        button { width: 100%; padding: 12px; background: #d4af37; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #ffdf00; transform: scale(1.02); }
+        .login-link { text-align: center; margin-top: 20px; font-size: 14px; color: #888; }
+        .login-link a { color: #d4af37; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="reg-card">
-        <h2>Teacher Access Request</h2>
+        <i class="fas fa-user-tie fa-3x" style="margin-bottom: 15px;"></i>
+        <h2>Faculty Registration</h2>
         <input type="text" id="username" placeholder="Full Name / Username">
         <input type="password" id="password" placeholder="Create Password">
         <select id="school">
@@ -28,6 +32,9 @@
     </div>
 
     <script>
+        // Render API Link
+        const API_URL = 'https://campusmind-3eyc.onrender.com';
+
         async function registerStaff() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -36,7 +43,7 @@
             if(!username || !password) return alert("Please fill all fields!");
 
             try {
-                const res = await fetch('http://127.0.0.1:8000/register_staff', {
+                const res = await fetch(`${API_URL}/register_staff`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, school })
@@ -49,7 +56,9 @@
                 } else {
                     alert(data.detail || "Registration failed");
                 }
-            } catch (err) { alert("Backend is offline!"); }
+            } catch (err) { 
+                alert("Could not connect to the server. Is the backend live?"); 
+            }
         }
     </script>
 </body>
