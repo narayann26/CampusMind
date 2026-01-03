@@ -9,3 +9,4 @@ pypdf
 python-dotenv
 groq
 passlib[bcrypt]
+python-multipart
