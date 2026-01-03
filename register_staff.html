@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CampusMind | Staff Registration</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .reg-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; }
+        h2 { color: #1a237e; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #1a237e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0d1440; }
+        .login-link { text-align: center; margin-top: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="reg-card">
+        <h2>Teacher Access Request</h2>
+        <input type="text" id="username" placeholder="Full Name / Username">
+        <input type="password" id="password" placeholder="Create Password">
+        <select id="school">
+            <option value="SOET">School of Engineering (SOET)</option>
+            <option value="SOM">School of Management (SOM)</option>
+            <option value="SOB">School of Business (SOB)</option>
+        </select>
+        <button onclick="registerStaff()">Request Approval</button>
+        <div class="login-link">Already approved? <a href="login.html">Login here</a></div>
+    </div>
+
+    <script>
+        async function registerStaff() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const school = document.getElementById('school').value;
+
+            if(!username || !password) return alert("Please fill all fields!");
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/register_staff', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, school })
+                });
+                
+                const data = await res.json();
+                if(res.ok) {
+                    alert("Request Sent! Please wait for Admin (Narayan) to approve your account.");
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.detail || "Registration failed");
+                }
+            } catch (err) { alert("Backend is offline!"); }
+        }
+    </script>
+</body>
+</html>

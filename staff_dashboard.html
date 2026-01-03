@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Portal | CampusMind</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gold: #d4af37; --bg: #050505; --card: #111; --text: #e0e0e0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: #000; border-right: 1px solid var(--gold); height: 100vh; position: fixed; }
+        .logo { padding: 30px; color: var(--gold); font-size: 22px; font-weight: 900; text-align: center; border-bottom: 1px solid #222; }
+        .nav-item { padding: 18px 25px; cursor: pointer; color: #888; transition: 0.3s; display: flex; align-items: center; gap: 12px; }
+        .nav-item:hover, .nav-item.active { color: var(--gold); background: rgba(212, 175, 55, 0.05); border-left: 4px solid var(--gold); }
+
+        /* Main Content */
+        .main { margin-left: 280px; padding: 40px; flex: 1; }
+        .card { background: var(--card); border: 1px solid #222; border-radius: 15px; padding: 30px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: var(--gold); margin-top: 0; text-transform: uppercase; font-size: 1.2rem; letter-spacing: 1px; }
+        
+        .welcome-msg { margin-bottom: 30px; border-left: 4px solid var(--gold); padding-left: 20px; }
+        
+        /* Upload Section */
+        .upload-zone { border: 2px dashed #333; padding: 40px; text-align: center; border-radius: 15px; transition: 0.3s; cursor: pointer; }
+        .upload-zone:hover { border-color: var(--gold); background: rgba(212, 175, 55, 0.02); }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
+        .btn { background: var(--gold); color: #000; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #ffdf00; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+
+        .info-p { color: #888; font-size: 0.9rem; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">STAFF PORTAL</div>
+        <div class="nav-item active"><i class="fas fa-chalkboard-teacher"></i> Faculty Home</div>
+        <div class="nav-item"><i class="fas fa-book"></i> My Subjects</div>
+        <div class="nav-item"><i class="fas fa-clipboard-list"></i> Assessments</div>
+        <div class="nav-item" onclick="location.href='login.html'" style="margin-top: auto;"><i class="fas fa-power-off"></i> Logout</div>
+    </div>
+
+    <div class="main">
+        <div class="welcome-msg">
+            <h1 id="faculty-name" style="margin:0;">Welcome, Professor</h1>
+            <p style="color:#666; margin:5px 0;">School of Engineering & Technology (SOET)</p>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-upload"></i> Upload Study Material / Notes</h2>
+            <p class="info-p"> Upload your study materials or notes here. The AI will use this information to assist students with their queries. </p>
+            
+            <input type="text" id="subject-name" placeholder="Subject Name (e.g. Artificial Intelligence)">
+            <input type="text" id="subject-code" placeholder="Subject Code (e.g. CST201)">
+            <textarea id="desc" placeholder="Brief description of the material..." rows="3"></textarea>
+            <input type="file" id="note-file">
+            
+            <button class="btn" onclick="uploadNote()">SYNC WITH AI MENTOR</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-info-circle"></i> Faculty Guidelines</h2>
+            <ul class="info-p" style="padding-left: 20px;">
+                <li>**Assessment Weightage**: Internal marks (40), Mid-term (20), End-term (40)[cite: 264].</li>
+                <li>**Plagiarism Check**: Sabhi submissions Turnitin se scan honi chahiye (Limit: 10%)[cite: 260, 262].</li>
+                <li>**OBE Focus**: Teaching method ko Bloom's Taxonomy ke sath align karein[cite: 211].</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('faculty-name').innerText = "Welcome, " + (localStorage.getItem('username') || "Professor");
+
+        async function uploadNote() {
+            const file = document.getElementById('note-file').files[0];
+            if(!file) return alert("Please select a file!");
+
+            const fd = new FormData();
+            fd.append("subject_name", document.getElementById('subject-name').value);
+            fd.append("subject_code", document.getElementById('subject-code').value);
+            fd.append("year", new Date().getFullYear());
+            fd.append("course", "SOET");
+            fd.append("file", file);
+
+            try {
+                // Hum wahi PYQ wala endpoint use kar sakte hain kyunki wo AI knowledge base ko update karta hai
+                const res = await fetch('http://127.0.0.1:8000/admin/upload_pyq', {
+                    method: 'POST',
+                    body: fd
+                });
+                if(res.ok) {
+                    alert("Material Uploaded! AI has learned from your notes.");
+                    location.reload();
+                }
+            } catch(e) { alert("Upload failed!"); }
+        }
+    </script>
+</body>
+</html>
