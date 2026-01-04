@@ -19,7 +19,7 @@ app = FastAPI()
 # CORS Middleware (Jo 'null' origin issue solve karega)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://campus-mind-red.vercel.app"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -208,3 +208,4 @@ async def chat(data: dict = Body(...)):
     system_prompt = f"You are CampusMind AI. User is a {role}. ONLY answer based on context. Prioritize 2026 dates. Context: {context}"
     response = client.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": query}], model="llama-3.3-70b-versatile")
     return {"response": response.choices[0].message.content}
+
