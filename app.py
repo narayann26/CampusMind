@@ -16,6 +16,7 @@ load_dotenv()
 
 app = FastAPI()
 
+# CORS Middleware (Jo 'null' origin issue solve karega)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,6 +24,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- DATABASE INITIALIZATION (Render ke liye zaroori) ---
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    # Users table
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, role TEXT, school TEXT, is_approved INTEGER)''')
+    # PYQs table
+    cursor.execute('''CREATE TABLE IF NOT EXISTS pyqs 
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, subject_name TEXT, subject_code TEXT, year INTEGER, file_path TEXT)''')
+    # Admin check (Agar admin nahi hai toh bana do)
+    cursor.execute("SELECT * FROM users WHERE role='admin'")
+    if not cursor.fetchone():
+        admin_pass = CryptContext(schemes=["bcrypt"], deprecated="auto").hash("admin123")
+        cursor.execute("INSERT INTO users (username, password, role, is_approved) VALUES (?, ?, ?, ?)", ('admin', admin_pass, 'admin', 1))
+    conn.commit()
+    conn.close()
+
+init_db()
 
 if not os.path.exists("documents"):
     os.makedirs("documents")
@@ -46,13 +67,11 @@ class LoginRequest(BaseModel):
 async def login(req: LoginRequest):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
-    # Humne role aur approval status dono fetch kiye
     cursor.execute("SELECT password, role, is_approved FROM users WHERE username = ?", (req.username,))
     user = cursor.fetchone()
     conn.close()
 
     if user and pwd_context.verify(req.password, user[0]):
-        # FIX: Admin ko approval ki zaroorat nahi honi chahiye
         role = user[1]
         is_approved = user[2]
         
